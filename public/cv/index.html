@@ -83,25 +83,6 @@
   .cv-photo{width:100%;aspect-ratio:1/1;object-fit:cover;display:block;border-radius:4px;margin-bottom:14px}
   .cv-photo-placeholder{width:100%;aspect-ratio:1/1;background:#d4e8f7;border-radius:4px;margin-bottom:14px;display:flex;align-items:center;justify-content:center;border:2px dashed #378ADD}
   .cv-photo-placeholder svg{opacity:.35}
-
-  /* ── PRINT ─────────────────────────────────────────────────────────────── */
-  @media print {
-    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-    @page { size: A4; margin: 0; }
-
-    header, .form-panel, .preview-label { display: none !important; }
-    body { background: #fff; }
-    .container { display: block; min-height: unset; }
-    .preview-panel { padding: 0; background: #fff; display: block; }
-
-    .cv {
-      width: 210mm;
-      height: 297mm;
-      box-shadow: none;
-      border-radius: 0;
-      page-break-inside: avoid;
-    }
-  }
 </style>
 </head>
 <body>
@@ -175,7 +156,7 @@
 
     <div id="validation-banner" class="validation-banner"></div>
     <button class="print-btn" id="pdf-btn" onclick="saveAsPDF()">⬇ Save as PDF</button>
-    <p class="hint" style="text-align:center;margin-top:8px">Se deschide dialogul de print — alege <strong>Save as PDF</strong></p>
+    <p class="hint" style="text-align:center;margin-top:8px">The PDF will be saved automatically to your Downloads folder</p>
 
   </div>
 
@@ -310,9 +291,55 @@ function validate(){
   return true;
 }
 
-function saveAsPDF(){
+async function saveAsPDF(){
   if(!validate()) return;
-  window.print();
+  const btn = document.getElementById('pdf-btn');
+  btn.disabled = true;
+  btn.textContent = 'Generating PDF…';
+
+  const payload = {
+    name:    document.getElementById('f-name').value,
+    title:   document.getElementById('f-title').value,
+    email:   document.getElementById('f-email').value,
+    phone:   document.getElementById('f-phone').value,
+    loc:     document.getElementById('f-loc').value,
+    li:      document.getElementById('f-li').value,
+    summary: document.getElementById('f-summary').value,
+    skills:  document.getElementById('f-skills').value,
+    photo:   photoDataUrl,
+    exp:     state.exp,
+    edu:     state.edu,
+    lang:    state.lang,
+    proj:    state.proj
+  };
+
+  try {
+    const response = await fetch('/generate-pdf', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      throw new Error(err.error || `Server error ${response.status}`);
+    }
+
+    const blob = await response.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const safeName = (payload.name || 'CV').replace(/\s+/g, '_');
+    a.href = url;
+    a.download = safeName + '_RACC_CV.pdf';
+    a.click();
+    URL.revokeObjectURL(url);
+  } catch(err) {
+    alert('PDF generation failed: ' + err.message);
+    console.error(err);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '⬇ Save as PDF';
+  }
 }
 
 const state={exp:[],edu:[],lang:[],proj:[]};

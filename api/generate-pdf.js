@@ -2,7 +2,6 @@ const chromium = require('@sparticuz/chromium');
 const puppeteer = require('puppeteer-core');
 const { buildCvHtml } = require('../views/cv-template');
 
-// Tell Vercel to auto-parse JSON body and allow up to 5MB (for base64 photo)
 module.exports.config = {
   api: {
     bodyParser: {
@@ -36,16 +35,20 @@ module.exports = async (req, res) => {
     const page = await browser.newPage();
     await page.setContent(html, { waitUntil: 'networkidle0' });
 
-    const pdf = await page.pdf({
+    const pdfUint8 = await page.pdf({
       format: 'A4',
       printBackground: true,
       margin: { top: 0, right: 0, bottom: 0, left: 0 },
     });
 
+    // Convert to Buffer explicitly — Puppeteer returns Uint8Array in newer versions
+    const pdf = Buffer.from(pdfUint8);
+
     const safeName = (data.name || 'CV').replace(/[^a-zA-Z0-9\-_ ]/g, '').replace(/\s+/g, '_');
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename="${safeName}_RACC_CV.pdf"`);
-    res.send(pdf);
+    res.setHeader('Content-Length', pdf.length);
+    res.end(pdf);
   } catch (err) {
     console.error('[CV PDF] Error:', err);
     res.status(500).json({ error: 'PDF generation failed', detail: err.message });
