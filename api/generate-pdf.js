@@ -2,24 +2,21 @@ const chromium = require('@sparticuz/chromium');
 const puppeteer = require('puppeteer-core');
 const { buildCvHtml } = require('../views/cv-template');
 
+// Tell Vercel to auto-parse JSON body and allow up to 5MB (for base64 photo)
+module.exports.config = {
+  api: {
+    bodyParser: {
+      sizeLimit: '5mb'
+    }
+  }
+};
+
 module.exports = async (req, res) => {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  let body = '';
-  await new Promise((resolve, reject) => {
-    req.on('data', chunk => { body += chunk; });
-    req.on('end', resolve);
-    req.on('error', reject);
-  });
-
-  let data;
-  try {
-    data = JSON.parse(body);
-  } catch {
-    return res.status(400).json({ error: 'Invalid JSON' });
-  }
+  const data = req.body;
 
   if (!data || !data.name) {
     return res.status(400).json({ error: 'Missing required fields' });
