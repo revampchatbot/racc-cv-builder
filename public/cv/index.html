@@ -208,7 +208,13 @@ function handlePhoto(input){
         dropArea.classList.remove('has-photo');
         photoDataUrl=null;render();return;
       }
-      photoDataUrl = e.target.result;
+      // Compress: resize to max 600×600 JPEG @85% — keeps PDF under 1MB
+      const MAX = 600;
+      const canvas = document.createElement('canvas');
+      canvas.width = MAX; canvas.height = MAX;
+      canvas.getContext('2d').drawImage(img, 0, 0, MAX, MAX);
+      photoDataUrl = canvas.toDataURL('image/jpeg', 0.85);
+
       dropArea.classList.remove('error-photo');
       dropArea.classList.add('has-photo');
       const thumb = document.getElementById('photo-thumb');
