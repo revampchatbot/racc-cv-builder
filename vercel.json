@@ -1,0 +1,12 @@
+{
+  "rewrites": [
+    { "source": "/cv", "destination": "/cv/index.html" },
+    { "source": "/generate-pdf", "destination": "/api/generate-pdf" }
+  ],
+  "functions": {
+    "api/generate-pdf.js": {
+      "memory": 1024,
+      "maxDuration": 30
+    }
+  }
+}
