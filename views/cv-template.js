@@ -89,7 +89,7 @@ function buildCvHtml(data) {
   .cv-body { display: grid; grid-template-columns: 242px 1fr; flex: 1; overflow: hidden; }
   .cv-left { background: #EBF3FB; padding: 22px 18px 24px 22px; border-right: 3px solid #185FA5; overflow: hidden; }
   .cv-right { padding: 22px 24px 24px; overflow: hidden; }
-  .cv-photo { width: 100%; aspect-ratio: 1/1; object-fit: cover; display: block; border-radius: 4px; margin-bottom: 16px; }
+  .cv-photo { width: 100%; height: auto; display: block; border-radius: 4px; margin-bottom: 16px; }
   .cv-summary { font-size: 10.5px; color: #333; line-height: 1.6; font-style: italic; }
   .cv-skill-wrap { display: flex; flex-wrap: wrap; gap: 5px; }
   .cv-skill { background: #185FA5; color: #fff; font-size: 9.5px; padding: 3px 9px; border-radius: 20px; font-family: Arial, Helvetica, sans-serif; }

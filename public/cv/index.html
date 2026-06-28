@@ -80,7 +80,7 @@
   .photo-upload-text strong{color:#185FA5;display:block;font-size:13px;margin-bottom:2px}
   .photo-error-msg{font-size:11px;color:#c0392b;margin-top:5px;display:none}
   .photo-error-msg.visible{display:block}
-  .cv-photo{width:100%;aspect-ratio:1/1;object-fit:cover;display:block;border-radius:4px;margin-bottom:14px}
+  .cv-photo{width:100%;height:auto;display:block;border-radius:4px;margin-bottom:14px}
   .cv-photo-placeholder{width:100%;aspect-ratio:1/1;background:#d4e8f7;border-radius:4px;margin-bottom:14px;display:flex;align-items:center;justify-content:center;border:2px dashed #378ADD}
   .cv-photo-placeholder svg{opacity:.35}
 </style>
@@ -107,7 +107,7 @@
       <img id="photo-thumb" class="photo-preview" style="display:none">
       <div id="photo-upload-text" class="photo-upload-text">
         <strong>Click to upload photo</strong>
-        Square image · minimum 500 × 500 px
+        Orice format · portrait, landscape sau pătrat
       </div>
     </div>
     <div id="photo-error" class="photo-error-msg"></div>
@@ -194,25 +194,15 @@ function handlePhoto(input){
     img.onload = function(){
       errEl.className='photo-error-msg';
       errEl.textContent='';
-      if(img.width !== img.height){
-        errEl.className='photo-error-msg visible';
-        errEl.textContent='The photo must be square (equal width and height). Please crop it first.';
-        dropArea.classList.add('error-photo');
-        dropArea.classList.remove('has-photo');
-        photoDataUrl=null;render();return;
-      }
-      if(img.width < 500 || img.height < 500){
-        errEl.className='photo-error-msg visible';
-        errEl.textContent=`Photo is too small (${img.width}×${img.height}px). Minimum required: 500×500px.`;
-        dropArea.classList.add('error-photo');
-        dropArea.classList.remove('has-photo');
-        photoDataUrl=null;render();return;
-      }
-      // Compress: resize to max 600×600 JPEG @85% — keeps PDF under 1MB
-      const MAX = 600;
+
+      // Resize to max 800px on longest side, preserve aspect ratio, JPEG 85%
+      const MAX = 800;
+      const scale = Math.min(MAX / img.width, MAX / img.height, 1);
+      const w = Math.round(img.width * scale);
+      const h = Math.round(img.height * scale);
       const canvas = document.createElement('canvas');
-      canvas.width = MAX; canvas.height = MAX;
-      canvas.getContext('2d').drawImage(img, 0, 0, MAX, MAX);
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
       photoDataUrl = canvas.toDataURL('image/jpeg', 0.85);
 
       dropArea.classList.remove('error-photo');
